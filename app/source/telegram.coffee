@@ -28,6 +28,12 @@ updateUser = (chatId, data) ->
 
 	return user
 
+addLink = (userId, link) ->
+	await global.linkModel.create
+		userId: userId
+		link: link
+		oldPrice: ""
+
 getKeyboardData = (buttons) ->
 	options = {}
 
@@ -60,6 +66,9 @@ getOptions = (user) ->
 
 	return options
 
+sendMessage = (user, text) ->
+	global.bot.sendMessage user.telegramId, text, getOptions user
+
 global.bot.on 'message', (message) ->
 	chatId = message.chat.id
 	textMessage = message.text
@@ -71,28 +80,28 @@ global.bot.on 'message', (message) ->
 	user = await getUser chatId
 	links = await user.getLinks()
 
-	console.log user
-	console.log links
-
 	switch textMessage
 		when "/start"
 			user = await updateUser chatId, {state: ''}
-			global.bot.sendMessage chatId, "Привет, это стартовое сообщение. Для начала работы давай добавим первую ссылку", getOptions user
+			sendMessage user, "Привет, это стартовое сообщение. Для начала работы давай добавим первую ссылку"
 		else
 			switch user.state
 				when ''
 					switch textMessage
 						when 'Добавить ссылку'
 							user = await updateUser chatId, {state: 'adding_link'}
-							global.bot.sendMessage chatId, "Отправь мне ссылку, что бы я ее начал отслеживать :)", getOptions user
+							sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
 							user = await updateUser chatId, {state: ''}
-							global.bot.sendMessage chatId, "Хорошо, возвращаю вас в меню :)", getOptions user
+							sendMessage user, "Хорошо, возвращаю вас в меню :)"
 						else
-							global.bot.sendMessage chatId, "Хм.. Это не похоже на ссылку", getOptions user
+							user = await updateUser chatId, {state: ''}
+							await addLink user.id, textMessage
+
+							sendMessage user, "Ссылка добавлена"
 
 				else
 					user = await updateUser chatId, {state: ''}
-					global.bot.sendMessage chatId, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+					sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"

@@ -1,4 +1,4 @@
-var TelegramBot, botConfig, botKey, getKeyboardData, getOptions, getUser, updateUser;
+var TelegramBot, addLink, botConfig, botKey, getKeyboardData, getOptions, getUser, sendMessage, updateUser;
 
 require("dotenv").config();
 
@@ -39,6 +39,14 @@ updateUser = async function(chatId, data) {
   return user;
 };
 
+addLink = async function(userId, link) {
+  return (await global.linkModel.create({
+    userId: userId,
+    link: link,
+    oldPrice: ""
+  }));
+};
+
 getKeyboardData = function(buttons) {
   var button, i, keyboard, len, options;
   options = {};
@@ -76,6 +84,10 @@ getOptions = function(user) {
   return options;
 };
 
+sendMessage = function(user, text) {
+  return global.bot.sendMessage(user.telegramId, text, getOptions(user));
+};
+
 global.bot.on('message', async function(message) {
   var chatId, links, textMessage, user;
   chatId = message.chat.id;
@@ -86,14 +98,12 @@ global.bot.on('message', async function(message) {
   }
   user = (await getUser(chatId));
   links = (await user.getLinks());
-  console.log(user);
-  console.log(links);
   switch (textMessage) {
     case "/start":
       user = (await updateUser(chatId, {
         state: ''
       }));
-      return global.bot.sendMessage(chatId, "Привет, это стартовое сообщение. Для начала работы давай добавим первую ссылку", getOptions(user));
+      return sendMessage(user, "Привет, это стартовое сообщение. Для начала работы давай добавим первую ссылку");
     default:
       switch (user.state) {
         case '':
@@ -102,7 +112,7 @@ global.bot.on('message', async function(message) {
               user = (await updateUser(chatId, {
                 state: 'adding_link'
               }));
-              return global.bot.sendMessage(chatId, "Отправь мне ссылку, что бы я ее начал отслеживать :)", getOptions(user));
+              return sendMessage(user, "Отправь мне ссылку, что бы я ее начал отслеживать :)");
           }
           break;
         case 'adding_link':
@@ -111,16 +121,20 @@ global.bot.on('message', async function(message) {
               user = (await updateUser(chatId, {
                 state: ''
               }));
-              return global.bot.sendMessage(chatId, "Хорошо, возвращаю вас в меню :)", getOptions(user));
+              return sendMessage(user, "Хорошо, возвращаю вас в меню :)");
             default:
-              return global.bot.sendMessage(chatId, "Хм.. Это не похоже на ссылку", getOptions(user));
+              user = (await updateUser(chatId, {
+                state: ''
+              }));
+              await addLink(user.id, textMessage);
+              return sendMessage(user, "Ссылка добавлена");
           }
           break;
         default:
           user = (await updateUser(chatId, {
             state: ''
           }));
-          return global.bot.sendMessage(chatId, "Извините, я немного запутался.. Повторите пожалуйста запрос :)");
+          return sendMessage(user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)");
       }
   }
 });
