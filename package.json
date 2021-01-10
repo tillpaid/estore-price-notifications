@@ -1,0 +1,23 @@
+{
+  "name": "estore-price-notifications",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@bitbucket.org:tillpaid/estore-price-notifications.git",
+  "author": "Alexandr Maiboroda <maiboroda@evergreens.in.ua>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app/public/index.js",
+    "build": "node_modules/gulp/bin/gulp.js",
+    "watch": "node_modules/gulp/bin/gulp.js watch"
+  },
+  "dependencies": {
+    "app-root-path": "^3.0.0",
+    "dotenv": "^8.2.0",
+    "gulp": "3.9.1",
+    "gulp-coffee": "^3.0.3",
+    "node-telegram-bot-api": "^0.51.0",
+    "sequelize": "^6.3.5",
+    "sqlite": "^4.0.19",
+    "sqlite3": "^5.0.1"
+  }
+}
