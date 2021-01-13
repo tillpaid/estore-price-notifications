@@ -34,6 +34,14 @@ addLink = (userId, link) ->
 		link: link
 		oldPrice: ""
 
+checkIfLinkExists = (userId, link) ->
+	count = await global.linkModel.count
+		where:
+			userId: userId
+			link: link
+
+	return count != 0
+
 getKeyboardData = (buttons) ->
 	options = {}
 
@@ -67,7 +75,7 @@ getOptions = (user) ->
 	return options
 
 sendMessage = (user, text) ->
-	global.bot.sendMessage user.telegramId, text, getOptions user
+	await global.bot.sendMessage user.telegramId, text, getOptions user
 
 global.bot.on 'message', (message) ->
 	chatId = message.chat.id
@@ -83,25 +91,36 @@ global.bot.on 'message', (message) ->
 	switch textMessage
 		when "/start"
 			user = await updateUser chatId, {state: ''}
-			sendMessage user, "Привет, это стартовое сообщение. Для начала работы давай добавим первую ссылку"
+			
+			await sendMessage user, "Привет, это стартовое сообщение"
+			await sendMessage user, "Для начала работы давай добавим первую ссылку"
+			await sendMessage user, "Для этого нажми на кнопку \"Добавить ссылку\""
 		else
 			switch user.state
 				when ''
 					switch textMessage
 						when 'Добавить ссылку'
 							user = await updateUser chatId, {state: 'adding_link'}
-							sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
+							await sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
+						else
+							await sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
 							user = await updateUser chatId, {state: ''}
-							sendMessage user, "Хорошо, возвращаю вас в меню :)"
+							await sendMessage user, "Хорошо, возвращаю вас в меню :)"
 						else
 							user = await updateUser chatId, {state: ''}
-							await addLink user.id, textMessage
 
-							sendMessage user, "Ссылка добавлена"
+							link = textMessage
+							linkExists = await checkIfLinkExists user.id, link
 
+							if linkExists
+								await sendMessage user, "Вы уже добавляли эту ссылку"
+								await sendMessage user, "Я отслеживаю ее для вас"
+							else
+								await addLink user.id, link
+								await sendMessage user, "Ссылка добавлена"
 				else
 					user = await updateUser chatId, {state: ''}
-					sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+					await sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
