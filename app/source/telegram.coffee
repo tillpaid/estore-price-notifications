@@ -17,6 +17,8 @@ getUser = (chatId) ->
 	if !user
 		user = await global.userModel.create {telegramId: chatId, state: ""}
 
+	user.links = await user.getLinks()
+
 	return user
 
 updateUser = (chatId, data) ->
@@ -70,7 +72,11 @@ getOptions = (user) ->
 		when 'adding_link'
 			options = getKeyboardData ["Вернуться в меню"]
 		else
-			options = getKeyboardData ["Добавить ссылку"]
+			options = getKeyboardData [
+				"Добавить ссылку"
+				"Мои ссылки: #{user.links.length}"
+			]
+
 
 	return options
 
@@ -86,12 +92,11 @@ global.bot.on 'message', (message) ->
 		return
 
 	user = await getUser chatId
-	links = await user.getLinks()
 
 	switch textMessage
 		when "/start"
 			user = await updateUser chatId, {state: ''}
-			
+
 			await sendMessage user, "Привет, это стартовое сообщение"
 			await sendMessage user, "Для начала работы давай добавим первую ссылку"
 			await sendMessage user, "Для этого нажми на кнопку \"Добавить ссылку\""
@@ -103,7 +108,15 @@ global.bot.on 'message', (message) ->
 							user = await updateUser chatId, {state: 'adding_link'}
 							await sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
 						else
-							await sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+							if textMessage.indexOf('Мои ссылки:') == 0
+								outputMessage = ["Вот ваши ссылки:", ""]
+
+								for item in user.links
+									outputMessage.push item.link
+
+								await sendMessage user, outputMessage.join "\n"
+							else
+								await sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
@@ -120,7 +133,9 @@ global.bot.on 'message', (message) ->
 								await sendMessage user, "Я отслеживаю ее для вас"
 							else
 								await addLink user.id, link
+								user = await getUser user.telegramId
 								await sendMessage user, "Ссылка добавлена"
+				when 'show_links'
 				else
 					user = await updateUser chatId, {state: ''}
 					await sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
