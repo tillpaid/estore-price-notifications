@@ -126,15 +126,21 @@ global.bot.on 'message', (message) ->
 							user = await updateUser chatId, {state: ''}
 
 							link = textMessage
-							linkExists = await checkIfLinkExists user.id, link
+							regex = /(((https:\/\/?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
 
-							if linkExists
-								await sendMessage user, "Вы уже добавляли эту ссылку"
-								await sendMessage user, "Я отслеживаю ее для вас"
+							match = link.match regex
+							if match and match[2] and match[2] == "https://estore.ua"
+								linkExists = await checkIfLinkExists user.id, link
+
+								if linkExists
+									await sendMessage user, "Вы уже добавляли эту ссылку"
+									await sendMessage user, "Я отслеживаю ее для вас"
+								else
+									await addLink user.id, link
+									user = await getUser user.telegramId
+									await sendMessage user, "Ссылка добавлена"
 							else
-								await addLink user.id, link
-								user = await getUser user.telegramId
-								await sendMessage user, "Ссылка добавлена"
+								await sendMessage user, "Извините, но эта ссылка не похожа, на ссылку с сайта https://estore.ua"
 				when 'show_links'
 				else
 					user = await updateUser chatId, {state: ''}
