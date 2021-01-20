@@ -1,4 +1,5 @@
 require("dotenv").config()
+axios = require "axios"
 
 TelegramBot = require 'node-telegram-bot-api'
 
@@ -136,9 +137,24 @@ global.bot.on 'message', (message) ->
 									await sendMessage user, "Вы уже добавляли эту ссылку"
 									await sendMessage user, "Я отслеживаю ее для вас"
 								else
-									await addLink user.id, link
-									user = await getUser user.telegramId
-									await sendMessage user, "Ссылка добавлена"
+									await sendMessage user, "Проверяю ссылку. Подождите несколько минут."
+									statusCode = null
+
+									try
+										response = await axios.get link
+										statusCode = response.status
+									catch error
+										if error.response and error.response.status
+											statusCode = error.response.status
+
+									if statusCode == 200
+										await addLink user.id, link
+										user = await getUser user.telegramId
+										await sendMessage user, "Ссылка добавлена"
+									else
+										await sendMessage user, "Ссылка ведет на другую страницу или такой страницы не существует :("
+										await sendMessage user, "Пожалуйста, проверьте, что ссылка верная и попробуйте еще раз."
+
 							else
 								await sendMessage user, "Извините, но эта ссылка не похожа, на ссылку с сайта https://estore.ua"
 				when 'show_links'
