@@ -1,9 +1,8 @@
 require("dotenv").config()
-rootPath = require "app-root-path"
 
 axios = require "axios"
-database = require "#{rootPath}/app/public/database"
-messages = require "#{rootPath}/app/public/messages"
+database = require "./database"
+messages = require "./messages"
 
 TelegramBot = require 'node-telegram-bot-api'
 
