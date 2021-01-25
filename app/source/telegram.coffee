@@ -1,5 +1,8 @@
 require("dotenv").config()
+rootPath = require "app-root-path"
+
 axios = require "axios"
+database = require "#{rootPath}/app/public/database"
 
 TelegramBot = require 'node-telegram-bot-api'
 
@@ -9,41 +12,6 @@ botConfig = {
 }
 
 global.bot = new TelegramBot botKey, botConfig
-
-getUser = (chatId) ->
-	user = await global.userModel.findOne
-		where:
-			telegramId: chatId
-
-	if !user
-		user = await global.userModel.create {telegramId: chatId, state: ""}
-
-	user.links = await user.getLinks()
-
-	return user
-
-updateUser = (chatId, data) ->
-	await global.userModel.update data,
-		where:
-			telegramId: chatId
-
-	user = await getUser chatId
-
-	return user
-
-addLink = (userId, link) ->
-	await global.linkModel.create
-		userId: userId
-		link: link
-		oldPrice: ""
-
-checkIfLinkExists = (userId, link) ->
-	count = await global.linkModel.count
-		where:
-			userId: userId
-			link: link
-
-	return count != 0
 
 getKeyboardData = (buttons) ->
 	options = {}
@@ -92,11 +60,11 @@ global.bot.on 'message', (message) ->
 		global.bot.sendMessage chatId, "Бот еще в разработке, приходите через время :)"
 		return
 
-	user = await getUser chatId
+	user = await database.getUser chatId
 
 	switch textMessage
 		when "/start"
-			user = await updateUser chatId, {state: ''}
+			user = await database.updateUser chatId, {state: ''}
 
 			await sendMessage user, "Привет, это стартовое сообщение"
 			await sendMessage user, "Для начала работы давай добавим первую ссылку"
@@ -106,7 +74,7 @@ global.bot.on 'message', (message) ->
 				when ''
 					switch textMessage
 						when 'Добавить ссылку'
-							user = await updateUser chatId, {state: 'adding_link'}
+							user = await database.updateUser chatId, {state: 'adding_link'}
 							await sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
 						else
 							if textMessage.indexOf('Мои ссылки:') == 0
@@ -121,17 +89,17 @@ global.bot.on 'message', (message) ->
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
-							user = await updateUser chatId, {state: ''}
+							user = await database.updateUser chatId, {state: ''}
 							await sendMessage user, "Хорошо, возвращаю вас в меню :)"
 						else
-							user = await updateUser chatId, {state: ''}
+							user = await database.updateUser chatId, {state: ''}
 
 							link = textMessage
 							regex = /(((https:\/\/?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
 
 							match = link.match regex
 							if match and match[2] and match[2] == "https://estore.ua"
-								linkExists = await checkIfLinkExists user.id, link
+								linkExists = await database.checkIfLinkExists user.id, link
 
 								if linkExists
 									await sendMessage user, "Вы уже добавляли эту ссылку"
@@ -148,8 +116,8 @@ global.bot.on 'message', (message) ->
 											statusCode = error.response.status
 
 									if statusCode == 200
-										await addLink user.id, link
-										user = await getUser user.telegramId
+										await database.addLink user.id, link
+										user = await database.getUser user.telegramId
 										await sendMessage user, "Ссылка добавлена"
 									else
 										await sendMessage user, "Ссылка ведет на другую страницу или такой страницы не существует :("
@@ -159,5 +127,5 @@ global.bot.on 'message', (message) ->
 								await sendMessage user, "Извините, но эта ссылка не похожа, на ссылку с сайта https://estore.ua"
 				when 'show_links'
 				else
-					user = await updateUser chatId, {state: ''}
+					user = await database.updateUser chatId, {state: ''}
 					await sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
