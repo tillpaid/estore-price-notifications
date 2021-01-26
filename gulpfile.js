@@ -2,7 +2,7 @@ const gulp = require('gulp')
 const coffee = require('gulp-coffee')
 
 const path = {
-	source: 'app/source/*.coffee',
+	source: 'app/source/**/*.coffee',
 	public: 'app/public/'
 }
 

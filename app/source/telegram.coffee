@@ -13,6 +13,9 @@ botConfig = {
 
 global.bot = new TelegramBot botKey, botConfig
 
+RouteClass = require "./routeClasses/route"
+route = new RouteClass database, messages
+
 global.bot.on 'message', (message) ->
 	chatId = message.chat.id
 	textMessage = message.text
@@ -35,18 +38,12 @@ global.bot.on 'message', (message) ->
 				when ''
 					switch textMessage
 						when 'Добавить ссылку'
-							user = await database.updateUser chatId, {state: 'adding_link'}
-							await messages.sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
+							user = route.default.addLink chatId
 						else
 							if textMessage.indexOf('Мои ссылки:') == 0
-								outputMessage = ["Вот ваши ссылки:", ""]
-
-								for item in user.links
-									outputMessage.push item.link
-
-								await messages.sendMessage user, outputMessage.join "\n"
+								route.default.printLinks user
 							else
-								await messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+								route.default.badMessage user
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
@@ -86,7 +83,6 @@ global.bot.on 'message', (message) ->
 
 							else
 								await messages.sendMessage user, "Извините, но эта ссылка не похожа, на ссылку с сайта https://estore.ua"
-				when 'show_links'
 				else
 					user = await database.updateUser chatId, {state: ''}
 					await messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
