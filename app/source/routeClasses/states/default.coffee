@@ -17,7 +17,9 @@ class Default
 			outputMessage.push item.link
 
 		await @messages.sendMessage user, outputMessage.join "\n"
-	badMessage: (user) ->
+	badMessage: (chatId) ->
+		user = await @database.updateUser chatId, {state: ''}
 		await @messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+		return user
 
 module.exports = Default

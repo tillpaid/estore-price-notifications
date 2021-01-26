@@ -43,7 +43,7 @@ global.bot.on 'message', (message) ->
 							if textMessage.indexOf('Мои ссылки:') == 0
 								route.default.printLinks user
 							else
-								route.default.badMessage user
+								user = route.default.badMessage chatId
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
@@ -84,5 +84,4 @@ global.bot.on 'message', (message) ->
 							else
 								await messages.sendMessage user, "Извините, но эта ссылка не похожа, на ссылку с сайта https://estore.ua"
 				else
-					user = await database.updateUser chatId, {state: ''}
-					await messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+					user = route.default.badMessage chatId
