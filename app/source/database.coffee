@@ -15,18 +15,15 @@ checkConnect = ->
 checkConnect()
 
 # models
-user = global.sequelize.define 'user', {
+userParams =
 	telegramId:
 		type: DataTypes.INTEGER
 		allowNull: false
 	state:
 		type: DataTypes.STRING
 		allowNull: false
-}, {
-	timestamps: false
-}
 
-link = global.sequelize.define 'link', {
+linkParams =
 	userId:
 		type: DataTypes.INTEGER
 		allowNull: false
@@ -36,55 +33,45 @@ link = global.sequelize.define 'link', {
 	oldPrice:
 		type: DataTypes.STRING
 		allowNull: false
-}, {
+
+noTimestamps =
 	timestamps: false
-}
 
-user.hasMany link, {}
+class Database
+	userModel: global.sequelize.define 'user', userParams, noTimestamps
+	linkModel: global.sequelize.define 'link', linkParams, noTimestamps
+	constructor: ->
+		@userModel.hasMany @linkModel, {}
+	getUser: (chatId) ->
+		user = await @userModel.findOne
+			where:
+				telegramId: chatId
 
-# functions
-getUser = (chatId) ->
-	user = await database.userModel.findOne
-		where:
-			telegramId: chatId
+		if !user
+			user = await @userModel.create {telegramId: chatId, state: ""}
 
-	if !user
-		user = await database.userModel.create {telegramId: chatId, state: ""}
+		user.links = await user.getLinks()
 
-	user.links = await user.getLinks()
+		return user
+	updateUser: (chatId, data) ->
+		await @userModel.update data,
+			where:
+				telegramId: chatId
 
-	return user
+		user = await @getUser chatId
 
-updateUser = (chatId, data) ->
-	await database.userModel.update data,
-		where:
-			telegramId: chatId
-
-	user = await database.getUser chatId
-
-	return user
-
-addLink = (userId, link) ->
-	await database.linkModel.create
-		userId: userId
-		link: link
-		oldPrice: ""
-
-checkIfLinkExists = (userId, link) ->
-	count = await database.linkModel.count
-		where:
+		return user
+	addLink: (userId, link) ->
+		await @linkModel.create
 			userId: userId
 			link: link
+			oldPrice: ""
+	checkIfLinkExists: (userId, link) ->
+		count = await @linkModel.count
+			where:
+				userId: userId
+				link: link
 
-	return count != 0
+		return count != 0
 
-# export
-database =
-	userModel: user
-	linkModel: link
-	getUser: getUser
-	updateUser: updateUser
-	addLink: addLink
-	checkIfLinkExists: checkIfLinkExists
-
-module.exports = database
+module.exports = Database

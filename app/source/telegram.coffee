@@ -1,7 +1,7 @@
 require("dotenv").config()
 
-database = require "./database"
-messages = require "./messages"
+database = new (require "./database")
+messages = new (require "./messages")
 
 TelegramBot = require 'node-telegram-bot-api'
 
