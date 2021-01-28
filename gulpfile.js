@@ -6,15 +6,21 @@ const path = {
 	public: 'app/public/'
 }
 
-gulp.task('compile-coffee', () => {
-	gulp
+function compileCoffee() {
+	return gulp
 		.src(path.source)
 		.pipe(coffee({bare: true}))
 		.pipe(gulp.dest(path.public))
-})
+}
 
-gulp.task('watch', ['compile-coffee'], () => {
-	gulp.watch(path.source, ['compile-coffee'])
-})
+function watcher() {
+	gulp.watch(path.source, build)
+}
 
-gulp.task('default', ['compile-coffee'], () => {})
+var build = gulp.series(compileCoffee)
+var watch = gulp.series(build, watcher)
+
+exports.build = build
+exports.watch = watch
+
+exports.default = build

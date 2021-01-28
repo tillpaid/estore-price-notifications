@@ -14,7 +14,7 @@
     "app-root-path": "^3.0.0",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
-    "gulp": "3.9.1",
+    "gulp": "^4.0.2",
     "gulp-coffee": "^3.0.3",
     "node-telegram-bot-api": "^0.51.0",
     "sequelize": "^6.3.5",
