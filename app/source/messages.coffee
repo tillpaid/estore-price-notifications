@@ -25,12 +25,23 @@ class Messages
 				options = {}
 			when 'adding_link'
 				options = @getKeyboardData ["Вернуться в меню"]
-			else
+			when 'remove_links'
 				options = @getKeyboardData [
+					"Да"
+					"Отменить"
+				]
+			else
+				linksLength = user.links.length
+
+				buttons = [
 					"Добавить ссылку"
-					"Мои ссылки: #{user.links.length}"
 				]
 
+				if linksLength
+					buttons.push "Мои ссылки: #{linksLength}"
+					buttons.push "Удалить все ссылки"
+
+				options = @getKeyboardData buttons
 
 		return options
 	sendMessage: (user, text) ->

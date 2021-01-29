@@ -34,6 +34,8 @@ global.bot.on 'message', (message) ->
 					switch textMessage
 						when 'Добавить ссылку'
 							user = route.default.addLink chatId
+						when 'Удалить все ссылки'
+							user = route.default.removeLinks chatId
 						else
 							if textMessage.indexOf('Мои ссылки:') == 0
 								route.default.printLinks user
@@ -45,5 +47,11 @@ global.bot.on 'message', (message) ->
 							user = route.addingLink.backToMenu chatId
 						else
 							user = route.addingLink.processLink chatId, textMessage
+				when 'remove_links'
+					switch textMessage
+						when 'Да'
+							user = route.removeLinks.confirmed chatId
+						else
+							user = route.removeLinks.canceled chatId
 				else
 					user = route.default.badMessage chatId

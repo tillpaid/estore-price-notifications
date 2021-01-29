@@ -1,5 +1,6 @@
 Default = require "./states/default"
 AddingLink = require "./states/addingLink"
+RemoveLinks = require "./states/removeLinks"
 
 class Route
 	# initial props
@@ -8,6 +9,7 @@ class Route
 	# initial methods
 	default: null
 	addingLink: null
+	removeLinks: null
 	# methods
 	constructor: (database, messages) ->
 		@database = database
@@ -15,6 +17,7 @@ class Route
 
 		@default = new Default @database, @messages
 		@addingLink = new AddingLink @database, @messages
+		@removeLinks = new RemoveLinks @database, @messages
 	startMessage: (chatId) ->
 		user = await @database.updateUser chatId, {state: ''}
 		await @messages.sendMessage user, "Привет, это стартовое сообщение"

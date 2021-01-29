@@ -66,6 +66,13 @@ class Database
 			userId: userId
 			link: link
 			oldPrice: ""
+	removeLinks: (user) ->
+		await @linkModel.destroy
+			where:
+				userId: user.id
+
+		user = await @getUser user.telegramId
+		return user
 	checkIfLinkExists: (userId, link) ->
 		count = await @linkModel.count
 			where:

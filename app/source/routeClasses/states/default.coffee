@@ -17,6 +17,10 @@ class Default
 			outputMessage.push item.link
 
 		await @messages.sendMessage user, outputMessage.join "\n"
+	removeLinks: (chatId) ->
+		user = await @database.updateUser chatId, {state: 'remove_links'}
+		await @messages.sendMessage user, "Вы уверены, что хотите удалить все ссылки?"
+		return user
 	badMessage: (chatId) ->
 		user = await @database.updateUser chatId, {state: ''}
 		await @messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
