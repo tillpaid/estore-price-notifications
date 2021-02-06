@@ -27,31 +27,31 @@ global.bot.on 'message', (message) ->
 
 	switch textMessage
 		when "/start"
-			user = route.startMessage chatId
+			user = route.startMessage user
 		else
 			switch user.state
 				when ''
 					switch textMessage
 						when 'Добавить ссылку'
-							route.default.addLink chatId
+							route.default.addLink user
 						when 'Удалить все ссылки'
-							route.default.removeLinks chatId
+							route.default.removeLinks user
 						else
 							if textMessage.indexOf('Мои ссылки:') == 0
 								route.default.printLinks user
 							else
-								route.default.badMessage chatId
+								route.default.badMessage user
 				when 'adding_link'
 					switch textMessage
 						when 'Вернуться в меню'
-							route.addingLink.backToMenu chatId
+							route.addingLink.backToMenu user
 						else
-							route.addingLink.processLink chatId, textMessage
+							route.addingLink.processLink user, textMessage
 				when 'remove_links'
 					switch textMessage
 						when 'Да'
-							route.removeLinks.confirmed chatId
+							route.removeLinks.confirmed user
 						else
-							route.removeLinks.canceled chatId
+							route.removeLinks.canceled user
 				else
-					route.default.badMessage chatId
+					route.default.badMessage user

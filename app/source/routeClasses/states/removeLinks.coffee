@@ -6,14 +6,14 @@ class RemoveLinks
 	constructor: (database, messages) ->
 		@database = database
 		@messages = messages
-	confirmed: (chatId) ->
-		user = await @database.updateUser chatId, {state: ''}
+	confirmed: (user) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
 		user = await @database.removeLinks user
 
 		await @messages.sendMessage user, "Все ссылки удалены"
 		return user
-	canceled: (chatId) ->
-		user = await @database.updateUser chatId, {state: ''}
+	canceled: (user) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
 		await @messages.sendMessage user, "Удаление отменено"
 		return user
 

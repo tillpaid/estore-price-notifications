@@ -18,8 +18,8 @@ class Route
 		@default = new Default @database, @messages
 		@addingLink = new AddingLink @database, @messages
 		@removeLinks = new RemoveLinks @database, @messages
-	startMessage: (chatId) ->
-		user = await @database.updateUser chatId, {state: ''}
+	startMessage: (user) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
 		await @messages.sendMessage user, "Привет, это стартовое сообщение"
 		await @messages.sendMessage user, "Для начала работы давай добавим первую ссылку"
 		await @messages.sendMessage user, "Для этого нажми на кнопку \"Добавить ссылку\""

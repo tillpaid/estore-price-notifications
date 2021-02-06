@@ -8,12 +8,12 @@ class AddingLink
 	constructor: (database, messages) ->
 		@database = database
 		@messages = messages
-	backToMenu: (chatId) ->
-		user = await @database.updateUser chatId, {state: ''}
+	backToMenu: (user) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
 		await @messages.sendMessage user, "Хорошо, возвращаю вас в меню :)"
 		return user
-	processLink: (chatId, textMessage) ->
-		user = await @database.updateUser chatId, {state: ''}
+	processLink: (user, textMessage) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
 
 		link = textMessage
 		regex = /(((https:\/\/?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/

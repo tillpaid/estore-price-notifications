@@ -6,8 +6,8 @@ class Default
 	constructor: (database, messages) ->
 		@database = database
 		@messages = messages
-	addLink: (chatId) ->
-		user = await @database.updateUser chatId, {state: 'adding_link'}
+	addLink: (user) ->
+		user = await @database.updateUser user.telegramId, {state: 'adding_link'}
 		await @messages.sendMessage user, "Отправь мне ссылку, что бы я ее начал отслеживать :)"
 		return user
 	printLinks: (user) ->
@@ -17,12 +17,12 @@ class Default
 			outputMessage.push item.link
 
 		await @messages.sendMessage user, outputMessage.join "\n"
-	removeLinks: (chatId) ->
-		user = await @database.updateUser chatId, {state: 'remove_links'}
+	removeLinks: (user) ->
+		user = await @database.updateUser user.telegramId, {state: 'remove_links'}
 		await @messages.sendMessage user, "Вы уверены, что хотите удалить все ссылки?"
 		return user
-	badMessage: (chatId) ->
-		user = await @database.updateUser chatId, {state: ''}
+	badMessage: (user) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
 		await @messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
 		return user
 
