@@ -22,6 +22,9 @@ userParams =
 	state:
 		type: DataTypes.STRING
 		allowNull: false
+	linkToRemove:
+		type: DataTypes.STRING
+		allowNull: true
 
 linkParams =
 	userId:
@@ -66,6 +69,14 @@ class Database
 			userId: userId
 			link: link
 			oldPrice: ""
+	removeOneLink: (user, link) ->
+		await @linkModel.destroy
+			where:
+				userId: user.id
+				link: link
+
+		user = await @getUser user.telegramId
+		return user
 	removeLinks: (user) ->
 		await @linkModel.destroy
 			where:

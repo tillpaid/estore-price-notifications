@@ -49,6 +49,18 @@ global.bot.on 'message', (message) ->
 							route.addingLink.backToMenu user
 						else
 							route.addingLink.processLink user, textMessage
+				when 'remove_one_link'
+					switch textMessage
+						when 'Вернуться в меню'
+							route.default.backToMenu user
+						else
+							route.removeOneLink.processLink user, textMessage
+				when 'remove_one_link_confirm'
+					switch textMessage
+						when 'Да'
+							route.removeOneLink.confirmed user
+						else
+							route.removeOneLink.canceled user
 				when 'remove_links'
 					switch textMessage
 						when 'Да'

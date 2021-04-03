@@ -1,5 +1,6 @@
 Default = require "./states/default"
 AddingLink = require "./states/addingLink"
+RemoveOneLink = require "./states/removeOneLink"
 RemoveLinks = require "./states/removeLinks"
 
 class Route
@@ -9,6 +10,7 @@ class Route
 	# initial methods
 	default: null
 	addingLink: null
+	removeOneLink: null
 	removeLinks: null
 	# methods
 	constructor: (database, messages) ->
@@ -17,6 +19,7 @@ class Route
 
 		@default = new Default @database, @messages
 		@addingLink = new AddingLink @database, @messages
+		@removeOneLink = new RemoveOneLink @database, @messages
 		@removeLinks = new RemoveLinks @database, @messages
 	startMessage: (user) ->
 		user = await @database.updateUser user.telegramId, {state: ''}

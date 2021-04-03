@@ -16,11 +16,13 @@ class Default
 		for item in user.links
 			await @messages.sendMessage user, item.link
 	removeOneLink: (user) ->
-		user = await @database.updateUser user.telegramId, {state: 'remove_one_link'}
-		text =
-			if user.links.length
-			then "Введите ссылку, которую вы хотите удалить"
-			else "Ваш список отслеживания пуст, вы не отслеживаете никакие товары"
+		text = ''
+
+		if user.links.length
+			user = await @database.updateUser user.telegramId, {state: 'remove_one_link'}
+			text = "Введите ссылку, которую вы хотите удалить"
+		else
+			text = "Ваш список отслеживания пуст, вы не отслеживаете никакие товары"
 
 		await @messages.sendMessage user, text
 		return user
@@ -31,6 +33,10 @@ class Default
 	badMessage: (user) ->
 		user = await @database.updateUser user.telegramId, {state: ''}
 		await @messages.sendMessage user, "Извините, я немного запутался.. Повторите пожалуйста запрос :)"
+		return user
+	backToMenu: (user) ->
+		user = await @database.updateUser user.telegramId, {state: ''}
+		await @messages.sendMessage user, "Возвращаю вас в меню"
 		return user
 
 module.exports = Default

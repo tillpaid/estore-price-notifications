@@ -25,6 +25,13 @@ class Messages
 				options = {}
 			when 'adding_link'
 				options = @getKeyboardData ["Вернуться в меню"]
+			when 'remove_one_link'
+				options = @getKeyboardData ["Вернуться в меню"]
+			when 'remove_one_link_confirm'
+				options = @getKeyboardData [
+					"Да"
+					"Отменить"
+				]
 			when 'remove_links'
 				options = @getKeyboardData [
 					"Да"
@@ -39,6 +46,7 @@ class Messages
 
 				if linksLength
 					buttons.push "Мои ссылки: #{linksLength}"
+					buttons.push "Удалить ссылку"
 					buttons.push "Удалить все ссылки"
 
 				options = @getKeyboardData buttons
