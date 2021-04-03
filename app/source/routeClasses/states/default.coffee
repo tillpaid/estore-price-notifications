@@ -15,6 +15,15 @@ class Default
 
 		for item in user.links
 			await @messages.sendMessage user, item.link
+	removeOneLink: (user) ->
+		user = await @database.updateUser user.telegramId, {state: 'remove_one_link'}
+		text =
+			if user.links.length
+			then "Введите ссылку, которую вы хотите удалить"
+			else "Ваш список отслеживания пуст, вы не отслеживаете никакие товары"
+
+		await @messages.sendMessage user, text
+		return user
 	removeLinks: (user) ->
 		user = await @database.updateUser user.telegramId, {state: 'remove_links'}
 		await @messages.sendMessage user, "Вы уверены, что хотите удалить все ссылки?"

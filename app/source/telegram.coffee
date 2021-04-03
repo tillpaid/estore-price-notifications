@@ -34,6 +34,8 @@ global.bot.on 'message', (message) ->
 					switch textMessage
 						when 'Добавить ссылку'
 							route.default.addLink user
+						when 'Удалить ссылку'
+							route.default.removeOneLink user
 						when 'Удалить все ссылки'
 							route.default.removeLinks user
 						else
